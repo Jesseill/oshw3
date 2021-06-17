@@ -223,7 +223,7 @@ Machine::swapPage(int addr)
 	unsigned int vpn = addr/PageSize;
 	unsigned int offset = addr%PageSize;
 	int swapVpn = -1; //victim
-	unsigned int ppn = kernel->machine->mBitmap->Find();
+	unsigned int ppn = kernel->machine->mBitmap->FindAndSet();
 	int min = pageTable[0].lastUseTime; //last use ticks
 
 
@@ -278,7 +278,7 @@ Machine::swapPage(int addr)
 	pageTable[vpn].virtualPage = vpn;
 	pageTable[vpn].physicalPage = ppn;
 	pageTable[vpn].valid = TRUE;
-	pageTable[vpn].lastUseTime = stats->totalTicks;
+	pageTable[vpn].lastUseTime = kernel->stats->totalTicks;
 	//更新被置換掉的頁表項
 	if(swapVpn != -1)
 	{
@@ -320,7 +320,7 @@ Machine::LRUSwap(int addr){
     if(entry->valid != FALSE)
 	    pageTable[entry->virtualPage] = *entry;						
     *entry = pageTable[vpn];
-    entry->lastUseTime = stats->totalTicks;
+    entry->lastUseTime = kernel->stats->totalTicks;
  
     //打印tlb中的内容
  
