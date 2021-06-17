@@ -52,7 +52,7 @@ void
 ExceptionHandler(ExceptionType which)
 {
 	int	type = kernel->machine->ReadRegister(2);
-	int	val, status, val1, val2, addr;
+	int	val, status, val1, val2;
     //cout<< "In ExceptionHandler(), Received Exception " << which << " type: " << type << ", " << kernel->stats->totalTicks<<endl;
     switch (which) {
 	case SyscallException:

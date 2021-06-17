@@ -278,7 +278,7 @@ Machine::swapPage(int addr)
 	pageTable[vpn].virtualPage = vpn;
 	pageTable[vpn].physicalPage = ppn;
 	pageTable[vpn].valid = TRUE;
-	pageTable[vpn].lastUseTime = kernel->stats->totalTicks;
+	pageTable[vpn].lastUseTime = stats->totalTicks;
 	//更新被置換掉的頁表項
 	if(swapVpn != -1)
 	{

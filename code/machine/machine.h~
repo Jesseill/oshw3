@@ -158,7 +158,7 @@ class Machine {
 
 // //Jess end
 bool swapPage(int addr); // Jess
-void LRUSwap(int addr);
+bool LRUSwap(int addr);
 
   private:
 
