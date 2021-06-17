@@ -19,7 +19,7 @@
 #include "main.h"
 #include "addrspace.h"
 //#include "machine.h"
-#include "noff.h"
+//#include "noff.h"
 
 //----------------------------------------------------------------------
 // SwapHeader
