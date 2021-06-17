@@ -24,8 +24,9 @@
 #include "copyright.h"
 #include "utility.h"
 #include "translate.h"
-
+#include "noff.h"
 #include "bitmap.h"//Jess
+#include "filesys.h"//Jess
 
 // Definitions related to the size, and format of user memory
 
