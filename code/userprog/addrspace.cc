@@ -204,8 +204,8 @@ AddrSpace::Load(char *fileName)
 
     //delete executable;			// close file //uncomment Jess
     return TRUE;			// success
+    }
 }
-
 //----------------------------------------------------------------------
 // AddrSpace::Execute
 // 	Run a user program.  Load the executable into memory, then
