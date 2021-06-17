@@ -25,6 +25,8 @@
 #include "utility.h"
 #include "translate.h"
 
+#include "bitmap.h"//Jess
+
 // Definitions related to the size, and format of user memory
 
 const unsigned int PageSize = 128; 		// set the page size equal to
@@ -33,6 +35,10 @@ const unsigned int PageSize = 128; 		// set the page size equal to
 const unsigned int NumPhysPages = 32;
 const int MemorySize = (NumPhysPages * PageSize);
 const int TLBSize = 4;			// if there is a TLB, make it small
+
+BitMap* mbitmap;//Jess
+
+
 
 enum ExceptionType { NoException,           // Everything ok!
 		     SyscallException,      // A program executed a system call.
@@ -132,6 +138,26 @@ class Machine {
     TranslationEntry *pageTable;
     unsigned int pageTableSize;
     bool ReadMem(int addr, int size, int* value);
+
+    NoffHeader noffH;		// Jess
+    OpenFile *executable;   //Jess
+
+// //Jess start
+// 	// TranslationEntry *pageTable;
+//     // unsigned int pageTableSize;//pagetable的size
+//     int  number_id;//id                                  
+//     int number_phy[NumPhysPages];//for physic pages num
+//     int number_sector;// sector
+ 
+//     bool usedPhy[NumPhysPages];//phys page free?
+//     bool usedvir[NumPhysPages];//virtual page free?
+//     TranslationEntry *recond_main[NumPhysPages];//
+//     int count[NumPhysPages];//LRU
+//     bool reference_bit[NumPhysPages];//second chance algo
+
+// //Jess end
+
+
   private:
 
 // Routines internal to the machine simulation -- DO NOT call these directly
@@ -160,7 +186,7 @@ class Machine {
 
     void Debugger();		// invoke the user program debugger
     void DumpState();		// print the user CPU and memory state 
-
+    bool swapPage(int addr); // Jess
 
 // Internal data structures
 

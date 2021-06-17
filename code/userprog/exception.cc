@@ -174,6 +174,23 @@ ExceptionHandler(ExceptionType which)
  		    break;
 	    }
 	    break;
+	//Jess start
+	PageFaultException:
+	cout<<"page fault"<<endl;
+	int addr = machine->ReadRegister(39);	 //BadVAddrReg
+	//not in memory then copy	
+	if(!kernel->machine->LRUSwap(addr))
+	{
+		kernel->machine->swapPage(addr);
+		//move to TLB
+	 	kernel->machine->LRUSwap(addr);
+	}
+        kernel->stats->numPageFaults++;
+
+	return;
+	ASSERTNOTREACHED();
+	break;
+	//Jess end
 	default:
 	    cerr << "Unexpected user mode exception" << which << "\n";
 	    break;

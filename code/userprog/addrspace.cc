@@ -31,6 +31,7 @@
 static void 
 SwapHeader (NoffHeader *noffH)
 {
+
     noffH->noffMagic = WordToHost(noffH->noffMagic);
     noffH->code.size = WordToHost(noffH->code.size);
     noffH->code.virtualAddr = WordToHost(noffH->code.virtualAddr);
@@ -53,6 +54,31 @@ SwapHeader (NoffHeader *noffH)
 
 AddrSpace::AddrSpace()
 {
+//below Jess
+    pageTable = new TranslationEntry[NumPhysPages]; //numPages??
+    for (unsigned int i = 0; i < NumPhysPages; i++) {
+        pageTable[i].virtualPage = i;// for now, virtual page # = phys page #
+        int ppn = kernel->machine->mBitmap->Find();//查找一个空闲块
+        if(ppn != -1) //Frame available
+        {
+            pageTable[i].physicalPage = ppn;
+            pageTable[i].valid = TRUE;
+        }
+        else //not available
+        {
+            pageTable[i].physicalPage = 0;
+            pageTable[i].valid = FALSE;
+        }
+        pageTable[i].use = FALSE;
+        pageTable[i].dirty = FALSE;
+        pageTable[i].readOnly = FALSE;  // if the code segment was entirely on 
+    }
+//above Jess
+// a separate page, we could set its 
+// pages to be read-only
+
+    
+    /* init
     pageTable = new TranslationEntry[NumPhysPages];
     for (unsigned int i = 0; i < NumPhysPages; i++) {
 	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
@@ -64,6 +90,7 @@ AddrSpace::AddrSpace()
 	pageTable[i].dirty = FALSE;
 	pageTable[i].readOnly = FALSE;  
     }
+    init */
     
     // zero out the entire address space
 //    bzero(kernel->machine->mainMemory, MemorySize);
@@ -97,6 +124,7 @@ AddrSpace::Load(char *fileName)
 //    cout<<"filename: "<<fileName<<"\n";
     NoffHeader noffH;
     unsigned int size;
+    unsigned int vAddr,vpn,ppn,pAddr, offset;//Jess
 
     if (executable == NULL) {
 	cerr << "Unable to open file " << fileName << "\n";
@@ -108,6 +136,9 @@ AddrSpace::Load(char *fileName)
     	SwapHeader(&noffH);
     ASSERT(noffH.noffMagic == NOFFMAGIC);
 
+    kernel->machine->noffH = noffH; //Jess
+    kernel->machine->executable = executable;//Jess
+
 // how big is address space?
     size = noffH.code.size + noffH.initData.size + noffH.uninitData.size 
 			+ UserStackSize;	// we need to increase the size
@@ -116,10 +147,10 @@ AddrSpace::Load(char *fileName)
 //	cout << "number of pages of " << fileName<< " is "<<numPages<<endl;
     size = numPages * PageSize;
 
-    ASSERT(numPages <= NumPhysPages);		// check we're not trying
+    //ASSERT(numPages <= NumPhysPages);		// check we're not trying 
 						// to run anything too big --
 						// at least until we have
-						// virtual memory
+						// numPages should be larger then NumPhysPages so we use virtual memory
 
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
@@ -127,19 +158,51 @@ AddrSpace::Load(char *fileName)
 	if (noffH.code.size > 0) {
         DEBUG(dbgAddr, "Initializing code segment.");
 	DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
-        	executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
-			noffH.code.size, noffH.code.inFileAddr);
+
+    //Jess start
+        for(int i = 0;i<noffH.code.size;i++)
+        {
+            vAddr = (unsigned)(noffH.code.virtualAddr + i);
+            vpn = (unsigned) vAddr/PageSize;//virtual page number
+            offset = (unsigned) vAddr%PageSize;//偏移量
+
+            if(pageTable[vpn].valid != FALSE)
+            { 
+                ppn = pageTable[vpn].physicalPage;      //物理块号
+                pAddr = ppn*PageSize + offset;      //物理地址
+                executable->ReadAt(&(kernel->machine->mainMemeory[pAddr],1,noffH.code.inFileAddr+i));//noffH.code.size?
+            }
+        }
+     // Jess end
+        // 	executable->ReadAt(
+		// &(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
+		// 	noffH.code.size, noffH.code.inFileAddr); //Jess uncomment
+
     }
 	if (noffH.initData.size > 0) {
         DEBUG(dbgAddr, "Initializing data segment.");
 	DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
-        executable->ReadAt(
-		&(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
-			noffH.initData.size, noffH.initData.inFileAddr);
-    }
 
-    delete executable;			// close file
+
+        for(int i = 0;i<noffH.initData.size;i++)
+        {
+            vAddr = (unsigned)noffH.initData.virtualAddr + i;
+            vpn = (unsigned) vAddr/PageSize;//virtual page number
+            offset = (unsigned) vAddr%PageSize;//
+            
+            if(pageTable[vpn].valid != FALSE)
+            { 
+                ppn = pageTable[vpn].physicalPage;//物理块号
+                pAddr = ppn*PageSize + offset;//物理地址
+                executable->ReadAt(&(machine->mainMemeory[pAddr],1,noffH.initData.inFileAddr+i));
+
+                    // executable->ReadAt(
+                    // &(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
+                    // 	noffH.initData.size, noffH.initData.inFileAddr); //Jess uncomment 
+            }   
+        }
+
+    //delete executable;			// close file //uncomment Jess
     return TRUE;			// success
 }
 
