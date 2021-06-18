@@ -61,22 +61,14 @@ UserProgKernel::Initialize()
 {
     ThreadedKernel::Initialize();	// init multithreading
 
+    
     machine = new Machine(debugUserProg);
+//added
     fileSystem = new FileSystem();
     swapMemory = new SynchDisk("SwapMemory"); //project_added
     freeSwapSector =new FreePage(NumSectors);
     swapTable = new int[NumSectors];
     counter = 0;
-
-    cout << "The replacement rule is "; 
-    switch(replaceRule)
-    {
-        case FIFO: cout << "FIFO"; break;
-        case LRU:  cout << "LRU";  break;
-        case LFU:  cout << "LFU";  break;
-        case MFU:  cout << "MFU";  break;
-    }
-    cout << endl;
 
 #ifdef FILESYS
     synchDisk = new SynchDisk("New SynchDisk");
