@@ -52,7 +52,7 @@ void
 ExceptionHandler(ExceptionType which)
 {
 	int	type = kernel->machine->ReadRegister(2);
-	int	val, status, val1, val2, addr;
+	int	val, status, val1, val2;
     //cout<< "In ExceptionHandler(), Received Exception " << which << " type: " << type << ", " << kernel->stats->totalTicks<<endl;
     switch (which) {
 	case SyscallException:
@@ -173,29 +173,68 @@ ExceptionHandler(ExceptionType which)
 		    cerr << "Unexpected system call " << type << "\n";
  		    break;
 	    }
-	    //break;
-	//Jess start
-	break;
+	    break;
 	case PageFaultException:
-	cout<<"page fault"<<endl;
-	addr = kernel->machine->ReadRegister(39);	 //BadVAddrReg
-	//not in memory then copy	
-	if(!kernel->machine->swapPage(addr))
-	{
-		kernel->machine->LRUSwap(addr);
-		//move to TLB
-	 	kernel->machine->swapPage(addr);
-	}
-        kernel->stats->numPageFaults++;
+		kernel->stats->numPageFaults++;
+		int badVAddr = kernel->machine->ReadRegister(39);
+		int vpn = badVAddr / PageSize;
 
-	return;
-	ASSERTNOTREACHED();
-	break;
-	//Jess end
+		int p; //page to swap in
+		Thread* t = 0;
+		if(kernel->machine->freePhysicalPage->empty())
+		{
+			//pick a victim
+			p = 0;
+			for(; p < NumPhysPages && (kernel->machine->lastFrame == p || kernel->machine->frameTable[p].inIO); p++);
+			if(p == NumPhysPages)
+				return;//Abort();
+
+			int minC = kernel->swapTable[kernel->machine->frameTable[p].pageTable->virtualPage];
+			for(int i = p + 1; i < NumPhysPages; ++i)
+				if((kernel->machine->lastFrame != i && !(kernel->machine->frameTable[i].inIO)) && minC > kernel->swapTable[kernel->machine->frameTable[i].pageTable->virtualPage])
+					{ p = i; minC = kernel->swapTable[kernel->machine->frameTable[i].pageTable->virtualPage]; }
+
+			kernel->machine->frameTable[p].pageTable->valid = FALSE;
+		
+			if(kernel->machine->frameTable[p].pageTable->dirty)
+			{
+				kernel->machine->frameTable[p].inIO = TRUE;
+				//cout << "Write virtual page " << kernel->machine->frameTable[p].pageTable->virtualPage << " into swap" << endl;
+				kernel->swapMemory->WriteSector(kernel->machine->frameTable[p].pageTable->virtualPage,
+				                                kernel->machine->mainMemory + p * PageSize);
+				kernel->machine->frameTable[p].inIO = FALSE;
+				//kernel->machine->frameTable[p].pageTable->dirty = FALSE;
+			}
+            //kernel->swapTable[kernel->machine->frameTable[p]->virtualPage] = 0;
+		}
+		else
+		{
+			p = kernel->machine->freePhysicalPage->pop();
+			//cout << "Free frame " << p << endl;
+		}
+
+		kernel->machine->frameTable[p].inIO = TRUE;
+		//cout << "Read swap sector " << kernel->machine->pageTable[vpn].virtualPage << " into frame " << p << endl;
+		kernel->swapMemory->ReadSector(kernel->machine->pageTable[vpn].virtualPage,
+		                               kernel->machine->mainMemory + p * PageSize/*, &p*/);
+		kernel->machine->frameTable[p].inIO = FALSE;
+
+		kernel->machine->pageTable[vpn].physicalPage = p;
+
+		kernel->machine->frameTable[p].pageTable = kernel->machine->pageTable + vpn;
+
+		kernel->machine->frameTable[p].pageTable->valid = TRUE;
+		kernel->machine->frameTable[p].t = kernel->currentThread;
+
+		kernel->machine->lastFrame = p;
+		if(kernel->replaceRule == FIFO)
+			kernel->swapTable[kernel->machine->pageTable[vpn].virtualPage] = ++kernel->counter;
+		return;
+		ASSERTNOTREACHED();
+		break;
 	default:
 	    cerr << "Unexpected user mode exception" << which << "\n";
-	    cout<<"errortype: "<<which<<endl;
-	break;
+	    break;
     }
     ASSERTNOTREACHED();
 }

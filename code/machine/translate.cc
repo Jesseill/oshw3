@@ -234,7 +234,19 @@ Machine::Translate(int virtAddr, int* physAddr, int size, bool writing)
 	return ReadOnlyException;
     }
     pageFrame = entry->physicalPage;
-    cout<<"pageFrame"<<pageFrame<<endl;
+	
+	/// Jess start /////////
+    int swapIndex = entry->virtualPage;
+    ASSERT(swapIndex < NumSectors);
+
+	kernel->swapTable[swapIndex] = kernel->counter++;
+
+    /// Jess end /////////
+
+
+
+
+
     // if the pageFrame is too big, there is something really wrong! 
     // An invalid translation was loaded into the page table or TLB. 
     if (pageFrame >= NumPhysPages) { 

@@ -22,6 +22,7 @@ UserProgKernel::UserProgKernel(int argc, char **argv)
 {
     debugUserProg = FALSE;
 	execfileNum=0;
+	replaceRule = LRU; // Jess using LRU
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-s") == 0) {
 	    debugUserProg = TRUE;
@@ -73,6 +74,11 @@ UserProgKernel::~UserProgKernel()
 {
     delete fileSystem;
     delete machine;
+	//Jess start
+	delete swapMemory; //project_added
+    delete freeSwapSector;
+    delete swapTable;
+	//Jess end
 #ifdef FILESYS
     delete synchDisk;
 #endif

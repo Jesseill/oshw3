@@ -16,6 +16,9 @@
 #include "filesys.h"
 #include "machine.h"
 #include "synchdisk.h"
+
+enum ReplaceRule { FIFO, LRU, LFU, MFU };//Jess SBC
+
 class SynchDisk;
 class UserProgKernel : public ThreadedKernel {
   public:
@@ -29,11 +32,21 @@ class UserProgKernel : public ThreadedKernel {
 
     void SelfTest();		// test whether kernel is working
 
+    // Jess start
+    Machine *machine;
+    FileSystem *fileSystem;
+    SynchDisk* swapMemory; // secondary memory
+    FreePage* freeSwapSector;
+    int* swapTable;
+    ReplaceRule replaceRule;//SBC
+    int counter;
+    // Jess end
+
+
 // These are public for notational convenience.
     Machine *machine;
     FileSystem *fileSystem;
-    
-    //SynchDisk *VirtualDisk;//Jess added //seems doesnt need
+
 #ifdef FILESYS
     SynchDisk *synchDisk;
 #endif // FILESYS

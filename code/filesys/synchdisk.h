@@ -39,6 +39,9 @@ class SynchDisk : public CallBackObj {
     					// Disk::ReadRequest/WriteRequest and
 					// then wait until the request is done.
     void WriteSector(int sectorNumber, char* data);
+
+    void WriteSectorCheat(int sectorNumber, char* data)//Jess SBC
+     { disk->WriteRequestCheat(sectorNumber, data); }//SBC
     
     void CallBack();			// Called by the disk device interrupt
 					// handler, to signal that the

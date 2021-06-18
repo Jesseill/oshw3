@@ -31,7 +31,7 @@ class AddrSpace {
     void RestoreState();		// info on a context switch 
 
   private:
-    TranslationEntry *pageTable;	//Virtual page ?// Assume linear page table translation
+    TranslationEntry *pageTable;	// Assume linear page table translation
 					// for now!
     unsigned int numPages;		// Number of pages in the virtual 
 					// address space
