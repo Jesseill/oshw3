@@ -148,7 +148,12 @@ Disk::WriteRequest(int sectorNumber, char* data)
     kernel->stats->numDiskWrites++;
     kernel->interrupt->Schedule(this, ticks, DiskInt);
 }
-
+void
+Disk::WriteRequestCheat(int sectorNumber, char* data)//Jess SBJ
+{
+    Lseek(fileno, SectorSize * sectorNumber + MagicSize, 0);
+    WriteFile(fileno, data, SectorSize);
+}
 //----------------------------------------------------------------------
 // Disk::CallBack()
 // 	Called by the machine simulation when the disk interrupt occurs.

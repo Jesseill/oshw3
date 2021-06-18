@@ -21,6 +21,7 @@
 #include "utility.h"
 #include "callback.h"
 #include "timer.h"
+#include "thread.h"
 
 // The following class defines a software alarm clock. 
 class Alarm : public CallBackObj {
