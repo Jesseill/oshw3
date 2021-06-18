@@ -79,6 +79,7 @@ AddrSpace::AddrSpace():pageTable(0)//Jess
 AddrSpace::~AddrSpace()
 {
     //Jess start
+    cout<<"when addrspace destruct say hi"<<endl;
     for(unsigned i = 0; i < numPages; ++i)
     {
       if(pageTable[i].valid)
@@ -104,14 +105,16 @@ bool
 AddrSpace::Load(char *fileName) 
 {
     OpenFile *executable = kernel->fileSystem->Open(fileName);
-//    cout<<"filename: "<<fileName<<"\n";
     NoffHeader noffH;
     unsigned int size;
+    int s,va,ia,remain;
+    //cout << "Laoding " << fileName << endl;
 
     if (executable == NULL) {
-	cerr << "Unable to open file " << fileName << "\n";
-	return FALSE;
+    	cerr << "Unable to open file " << fileName << "\n";
+    	return FALSE;
     }
+//    cout << "Loading " << fileName << endl;
     executable->ReadAt((char *)&noffH, sizeof(noffH), 0);
     if ((noffH.noffMagic != NOFFMAGIC) && 
 		(WordToHost(noffH.noffMagic) == NOFFMAGIC))
@@ -124,86 +127,109 @@ AddrSpace::Load(char *fileName)
 						// to leave room for the stack
     numPages = divRoundUp(size, PageSize);
 //	cout << "number of pages of " << fileName<< " is "<<numPages<<endl;
+cout<<"numpages "<<numPages<<endl;
+cout<<"virtual mem size "<<size<<endl;
     size = numPages * PageSize;
-    char* tmp = new char[size]();//Jess
+    char* tmp = new char[size]();
 
-//    ASSERT(numPages <= NumPhysPages);		// check we're not trying
+    //ASSERT(numPages <= NumPhysPages);		// check we're not trying
 						// to run anything too big --
 						// at least until we have
 						// virtual memory
-
+/*
+    while(numPages > freePhysicalPage.size())
+    {
+//      cout << "Let " << fileName << " wait for enough memory!" << endl;
+      IntStatus oldLevel = kernel->interrupt->SetLevel(IntOff);
+      kernel->scheduler->ReadyToRun(kernel->currentThread);
+      Thread* nextThread = kernel->scheduler->FindNextToRun();
+      kernel->scheduler->Run(nextThread, FALSE);
+      (void) kernel->interrupt->SetLevel(oldLevel);
+    }
+*/
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
-    //Change here
+    /*** Create the mapping between the virtual and physical page here! ***/
+//    cout << "Loading " << fileName << endl;
     pageTable = new TranslationEntry[numPages];
-    for(unsigned i = 0; i < numPages; i++) 
-    {
-        //pageTable[i].init();
-        //pageTable[i].virtualPage = i;	// for now, virt page # = phys page #       
-        //pageTable[i].physicalPage = i;
-        ASSERT(!kernel->freeSwapSector->empty())
+	cout<<numPages<<endl;    
+	for(unsigned i = 0; i < numPages; i++) {
+	    //cout<<i<<endl;
+		//pageTable[i].init();
+	     ASSERT(!kernel->freeSwapSector->empty())
+	    pageTable[i].virtualPage  = kernel->freeSwapSector->pop(); 
+		// mapping between the virtual and physical page
+	    //cout<<"init virtualPage :"<<virtualPage<<" withupper: "<<endl;
+	    
+	    kernel->swapTable[pageTable[i].virtualPage] = 0;
+	   
+	    pageTable[i].valid        = FALSE;
+	    pageTable[i].readOnly     = FALSE;
+	    pageTable[i].use          = FALSE;
+	    pageTable[i].dirty        = FALSE;
+	
+	}
+//    for(unsigned i = 0; i < numPages; ++i) cout << pageTable[i].physicalPage << endl;
+    /******************************** end *********************************/
 
-        pageTable[i].virtualPage = kernel->freeSwapSector->pop();
-	kernel->swapTable[pageTable[i].virtualPage] = 0;
-    	pageTable[i].physicalPage = 0;
-        pageTable[i].valid = FALSE;
-        pageTable[i].use = FALSE;
-        pageTable[i].dirty = FALSE;
-        pageTable[i].readOnly = FALSE;  
-
-    }
 
 // then, copy in the code and data segments into memory
 	if (noffH.code.size > 0) {
         DEBUG(dbgAddr, "Initializing code segment.");
 	    DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
-        //Jess start
-        int s = noffH.code.size;
-        int va = noffH.code.virtualAddr;
-        int ia = noffH.code.inFileAddr;
-        int remain;
-        while(s>0){
-            remain = s< (PageSize - va % PageSize) ? s : PageSize - va % PageSize;
+        //cout << "Initializing code segment." << endl;
+        s = noffH.code.size;
+        va = noffH.code.virtualAddr;
+        ia = noffH.code.inFileAddr;
+        while(s > 0) {
+            //ASSERT(va <= size);
+            remain = PageSize - va% PageSize;
+            //if(s < remain) remain = s;
+	    remain = s<PageSize - va% PageSize?s : PageSize - va% PageSize;
             
+	        
             executable->ReadAt(tmp + va, remain, ia);
-            s -= remain;
-            va += remain;
-            ia += remain; 
+            s -= remain; va += remain; ia += remain;
+	       
         }
-
-        // 	executable->ReadAt(
-		// &(kernel->machine->mainMemory[noffH.code.virtualAddr]), 
-		// 	noffH.code.size, noffH.code.inFileAddr);
     }
 	if (noffH.initData.size > 0) {
         DEBUG(dbgAddr, "Initializing data segment.");
-    	DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
-        //Jess start
-        int s = noffH.initData.size;
-        int va = noffH.initData.virtualAddr;
-        int ia = noffH.initData.inFileAddr;
-        int remain;
-        while(s>0){
-            remain = s< (PageSize - va % PageSize) ? s : PageSize - va % PageSize;
-            
-            executable->ReadAt(tmp + va, remain, ia);
-            s -= remain;
-            va += remain;
-            ia += remain; 
+	    DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
+        //cout << "Initializing data segment." << endl;
+        s = noffH.initData.size;
+        va = noffH.initData.virtualAddr;
+        ia = noffH.initData.inFileAddr;
+        while(s > 0)
+        {
+            //ASSERT(va <= size);
+            remain = PageSize - va% PageSize;
+            //if(s < remain) remain = s;
+	    remain = s<PageSize - va% PageSize?s : PageSize - va% PageSize;
+	
+            executable->ReadAt(
+                tmp + va, 
+                remain, 
+                ia
+            );
+            s -= remain; 
+            va += remain; 
+            ia += remain;
+	
         }
-       
-    ASSERT(PageSize == SectorSize);// Jess SBC
-    for(int i = 0 ; i < numPages; i++)
+    }
+
+    ASSERT(PageSize == SectorSize);
+    //RestoreState();
+    //cout << "numPages = " << numPages << endl;
+    for(int i = 0 ; i < numPages; ++i)
     {
         //cout << "write page " << i << " to sector " << pageTable[i].virtualPage << endl;
         kernel->swapMemory->WriteSectorCheat(pageTable[i].virtualPage, tmp + i * PageSize);
     }
-       
-        // executable->ReadAt(
-		// &(kernel->machine->mainMemory[noffH.initData.virtualAddr]),
-		// 	noffH.initData.size, noffH.initData.inFileAddr);
-    }
-    delete []tmp;//Jess
+    //cout << "Finish to load " << fileName << endl;
+
+    delete []tmp;
     delete executable;			// close file
     return TRUE;			// success
 }

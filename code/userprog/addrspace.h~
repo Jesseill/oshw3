@@ -17,7 +17,7 @@
 #include "filesys.h"
 #include <string.h>
 
-#define UserStackSize		1000000 	// increase this as necessary!
+#define UserStackSize		4096 	// increase this as necessary!
 
 class AddrSpace {
   public:
@@ -41,15 +41,13 @@ class AddrSpace {
 
     void InitRegisters();		// Initialize user-level CPU registers,
 					// before jumping to user code
-
-
-    // Physical Address = pageTable[(virtual address / PageSize)].physicalPage * PageSize + (virtual address % PageSize)
     int VirToPhy(int virtualAddr) const
     {
-      return pageTable[virtualAddr/PageSize].physicalPage * PageSize + virtualAddr % PageSize;
+      return pageTable[virtualAddr/128].physicalPage * 128 + virtualAddr % 128;
     }
 
-    static int restPlace(int virtualAddr) { return PageSize - virtualAddr % PageSize; }
+    static int restPlace(int virtualAddr) { return 128 - virtualAddr % 128; }
+
 };
 
 #endif // ADDRSPACE_H

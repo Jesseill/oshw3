@@ -29,15 +29,6 @@
 
 class TranslationEntry {
   public:
-    void init()
-    {
-      virtualPage  = kernel->freeSwapSection->pop();
-      valid        = FALSE;
-      readOnly     = FALSE;
-      use          = FALSE;
-      dirty        = FALSE;
-    }
-
     unsigned int virtualPage;  	// The page number in virtual memory.
     unsigned int physicalPage;  // The page number in real memory (relative to the
 			//  start of "mainMemory"
@@ -50,4 +41,5 @@ class TranslationEntry {
     bool dirty;         // This bit is set by the hardware every time the
 			// page is modified.
 };
+
 #endif
