@@ -33,8 +33,6 @@ class UserProgKernel : public ThreadedKernel {
     void SelfTest();		// test whether kernel is working
 
     // Jess start
-    Machine *machine;
-    FileSystem *fileSystem;
     SynchDisk* swapMemory; // secondary memory
     FreePage* freeSwapSector;
     int* swapTable;
