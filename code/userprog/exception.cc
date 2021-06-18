@@ -53,6 +53,11 @@ ExceptionHandler(ExceptionType which)
 {
 	int	type = kernel->machine->ReadRegister(2);
 	int	val, status, val1, val2;
+	int badVAddr = kernel->machine->ReadRegister(39);
+	int vpn = badVAddr / PageSize;
+
+	int p; //page to swap in
+	//Thread* t = 0;
     //cout<< "In ExceptionHandler(), Received Exception " << which << " type: " << type << ", " << kernel->stats->totalTicks<<endl;
     switch (which) {
 	case SyscallException:
@@ -176,11 +181,7 @@ ExceptionHandler(ExceptionType which)
 	    break;
 	case PageFaultException:
 		kernel->stats->numPageFaults++;
-		int badVAddr = kernel->machine->ReadRegister(39);
-		int vpn = badVAddr / PageSize;
 
-		int p; //page to swap in
-		Thread* t = 0;
 		if(kernel->machine->freePhysicalPage->empty())
 		{
 			//pick a victim
@@ -227,8 +228,7 @@ ExceptionHandler(ExceptionType which)
 		kernel->machine->frameTable[p].t = kernel->currentThread;
 
 		kernel->machine->lastFrame = p;
-		if(kernel->replaceRule == FIFO)
-			kernel->swapTable[kernel->machine->pageTable[vpn].virtualPage] = ++kernel->counter;
+
 		return;
 		ASSERTNOTREACHED();
 		break;
