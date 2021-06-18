@@ -144,6 +144,7 @@ AddrSpace::Load(char *fileName)
         ASSERT(!kernel->freeSwapSector->empty())
 
         pageTable[i].virtualPage = kernel->freeSwapSector->pop();
+	kernel->swapTable[pageTable[i].virtualPage] = 0;
     	pageTable[i].physicalPage = 0;
         pageTable[i].valid = FALSE;
         pageTable[i].use = FALSE;

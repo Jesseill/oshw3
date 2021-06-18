@@ -47,7 +47,7 @@ UserProgKernel::UserProgKernel(int argc, char **argv)
     else if(strcmp(argv[i], "-fifo") == 0) replaceRule = FIFO;
     else if(strcmp(argv[i], "-lru" ) == 0) replaceRule = LRU;
     else if(strcmp(argv[i], "-lfu" ) == 0) replaceRule = LFU;
-    else replaceRule = LRU;
+    else if(strcmp(argv[i], "-mfu" ) == 0) replaceRule = MFU;
     }
 }
 
