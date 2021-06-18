@@ -46,7 +46,7 @@
 #include "addrspace.h"
 #endif
 
-#define NumTotalRegs 40
+#define NumTotalRegs 39
 // CPU register state to be saved on context switch.  
 // The x86 needs to save only a few registers, 
 // SPARC and MIPS needs to save 10 registers, 

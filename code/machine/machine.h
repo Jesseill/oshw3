@@ -24,6 +24,7 @@
 #include "copyright.h"
 #include "utility.h"
 #include "translate.h"
+#include "thread.h"
 
 // Definitions related to the size, and format of user memory
 
@@ -114,7 +115,7 @@ private:
 
 
 
-
+class Thread;//Jess
 class Instruction;
 class Interrupt;
 

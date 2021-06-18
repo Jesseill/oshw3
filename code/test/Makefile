@@ -80,7 +80,7 @@ quick: quick.o start.o
 	$(LD) $(LDFLAGS) start.o quick.o -o quick.coff
 	../bin/coff2noff quick.coff quick
 
-bubble: quick.o start.o
+bubble: bubble.o start.o
 	$(LD) $(LDFLAGS) start.o bubble.o -o bubble.coff
 	../bin/coff2noff bubble.coff bubble
 

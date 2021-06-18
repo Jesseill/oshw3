@@ -24,9 +24,7 @@
 #include "copyright.h"
 #include "utility.h"
 #include "translate.h"
-#include "noff.h"
-#include "bitmap.h"//Jess
-#include "filesys.h"//Jess
+#include "thread.h"
 
 // Definitions related to the size, and format of user memory
 
@@ -36,10 +34,6 @@ const unsigned int PageSize = 128; 		// set the page size equal to
 const unsigned int NumPhysPages = 32;
 const int MemorySize = (NumPhysPages * PageSize);
 const int TLBSize = 4;			// if there is a TLB, make it small
-
-
-
-
 
 enum ExceptionType { NoException,           // Everything ok!
 		     SyscallException,      // A program executed a system call.
@@ -88,7 +82,40 @@ enum ExceptionType { NoException,           // Everything ok!
 //
 // The procedures in this class are defined in machine.cc, mipssim.cc, and
 // translate.cc.
+//Jess start
+class FreePage //not that powerful, but enough in this homework
+{
+public:
+    FreePage(unsigned n)
+    : Array    (new unsigned[n])
+    , begin    (0)
+    , end      (n)
+    , numPages (n)
+    {
+        for(unsigned i = 0; i < numPages; ++i) Array[i] = i;
+    }
+    ~FreePage() { delete []Array; }
 
+    unsigned pop();
+    void push(unsigned);
+
+    bool empty()const { return begin == end; }
+    bool full()const { return size() == numPages; }
+    unsigned size()const { return end - begin; }
+
+private:
+    unsigned*  Array;
+    unsigned   begin;
+    unsigned   end;
+    unsigned   numPages;
+};
+//Jess end
+
+
+
+
+
+class Thread;//Jess
 class Instruction;
 class Interrupt;
 
@@ -111,9 +138,21 @@ class Machine {
 //
 // Note that *all* communication between the user program and the kernel 
 // are in terms of these data structures (plus the CPU registers).
-    BitMap* mBitmap;//Jess
+
     char *mainMemory;		// physical memory to store user program,
 				// code and data, while executing
+
+
+    /// Jess start ///////////////
+    FreePage* freePhysicalPage; 
+    struct FrameTable { 
+        TranslationEntry* pageTable; // virtual page which is stored by the physical page 
+        //Thread* t; 
+        bool inIO; // whether this physical page is doing r/w
+    }* frameTable;
+
+    int lastFrame;
+    /// Jess end ///////////////
 
 // NOTE: the hardware translation of virtual addresses in the user program
 // to physical addresses (relative to the beginning of "mainMemory")
@@ -139,27 +178,6 @@ class Machine {
     TranslationEntry *pageTable;
     unsigned int pageTableSize;
     bool ReadMem(int addr, int size, int* value);
-
-    NoffHeader noffH;		// Jess
-    OpenFile *executable;   //Jess
-
-// //Jess start
-// 	// TranslationEntry *pageTable;
-//     // unsigned int pageTableSize;//pagetable的size
-//     int  number_id;//id                                  
-//     int number_phy[NumPhysPages];//for physic pages num
-//     int number_sector;// sector
- 
-//     bool usedPhy[NumPhysPages];//phys page free?
-//     bool usedvir[NumPhysPages];//virtual page free?
-//     TranslationEntry *recond_main[NumPhysPages];//
-//     int count[NumPhysPages];//LRU
-//     bool reference_bit[NumPhysPages];//second chance algo
-
-// //Jess end
-bool swapPage(int addr); // Jess
-bool LRUSwap(int addr);
-
   private:
 
 // Routines internal to the machine simulation -- DO NOT call these directly
@@ -188,7 +206,7 @@ bool LRUSwap(int addr);
 
     void Debugger();		// invoke the user program debugger
     void DumpState();		// print the user CPU and memory state 
-   
+
 
 // Internal data structures
 
