@@ -70,15 +70,19 @@ UserProgKernel::Initialize()
     freeVirtualPage =new FreePage(NumSectors);
     pageUsedCount = new int[NumSectors];
     counter = 0;
-    int status = kernel->fileSystem->Create("swapfile");
-    if(status == true){
-        swapfile = kernel->fileSystem->Open("swapfile");
-        if(swapfile == NULL)
-            cout<<"failed fd"<<endl;
-        else
-            cout<<"success ini swapfile"<<endl;
-    }else
-        cout<<"failed ini swapfile"<<endl;
+
+    int status ;
+    for(int i=0; i<NumSectors; i++){
+        status= kernel->fileSystem->Create("swapfile" + (i + '0'));
+        if(status == true){
+            swapfile[i] = kernel->fileSystem->Open("swapfile" + (i + '0'));
+            if(swapfile[i] == NULL)
+                cout<<"failed fd"<<endl;
+            else
+                cout<<"success ini swapfile"<<endl;
+        }else
+            cout<<"failed ini swapfile"<<endl;
+    }
 
 #ifdef FILESYS
     synchDisk = new SynchDisk("New SynchDisk");
