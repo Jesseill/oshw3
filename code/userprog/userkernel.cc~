@@ -65,8 +65,8 @@ UserProgKernel::Initialize()
     machine = new Machine(debugUserProg);
     fileSystem = new FileSystem();
     swapMemory = new SynchDisk("SwapMemory"); //project_added
-    freeSwapSector =new FreePage(NumSectors);
-    swapTable = new int[NumSectors];
+    freeVirtualPage =new FreePage(NumSectors);
+    pageUsedCount = new int[NumSectors];
     counter = 0;
 
 #ifdef FILESYS
@@ -85,8 +85,8 @@ UserProgKernel::~UserProgKernel()
     delete fileSystem;
     delete machine;
     delete swapMemory; //project_added
-    delete freeSwapSector;
-    delete swapTable;
+    delete freeVirtualPage;
+    delete pageUsedCount;
 #ifdef FILESYS
     delete synchDisk;
 #endif

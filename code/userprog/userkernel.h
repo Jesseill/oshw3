@@ -16,6 +16,7 @@
 #include "filesys.h"
 #include "machine.h"
 #include "synchdisk.h"
+#include "openfile.h"
 
 enum ReplaceRule { FIFO, LRU, LFU, MFU };//Jess SBC
 
@@ -34,16 +35,17 @@ class UserProgKernel : public ThreadedKernel {
 
     // Jess start
     SynchDisk* swapMemory; // secondary memory
-    FreePage* freeSwapSector;
-    int* swapTable;
+    FreePage* freeVirtualPage;
+    int* pageUsedCount;
     ReplaceRule replaceRule;//SBC
-    int counter;
+    int counter; //last used counter
     // Jess end
 
 
 // These are public for notational convenience.
     Machine *machine;
     FileSystem *fileSystem;
+    Openfile *swapfile;
 
 #ifdef FILESYS
     SynchDisk *synchDisk;

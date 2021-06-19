@@ -68,19 +68,6 @@ WordToMachine(unsigned int word) { return WordToHost(word); }
 unsigned short
 ShortToMachine(unsigned short shortword) { return ShortToHost(shortword); }
 
-void TranslationEntry::init()
-{
-    ASSERT(!kernel->freeSwapSector->empty())
-    virtualPage  = kernel->freeSwapSector->pop(); // mapping between the virtual and physical page
-    //cout<<"init virtualPage :"<<virtualPage<<" withupper: "<<endl;
-    
-    kernel->swapTable[virtualPage] = 0;
-   
-    valid        = FALSE;
-    readOnly     = FALSE;
-    use          = FALSE;
-    dirty        = FALSE;
-}
 //----------------------------------------------------------------------
 // Machine::ReadMem
 //      Read "size" (1, 2, or 4) bytes of virtual memory at "addr" into 
@@ -254,7 +241,7 @@ Machine::Translate(int virtAddr, int* physAddr, int size, bool writing)
     int swapIndex = entry->virtualPage;
     ASSERT(swapIndex < NumSectors);
 
-	kernel->swapTable[swapIndex] = kernel->counter++;
+	kernel->pageUsedCount[swapIndex] = kernel->counter++;
 
     /// Jess end /////////
 

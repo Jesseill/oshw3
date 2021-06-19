@@ -190,10 +190,10 @@ ExceptionHandler(ExceptionType which)
 			if(p == NumPhysPages)
 				return;//Abort();
 
-			int minC = kernel->swapTable[kernel->machine->frameTable[p].pageTable->virtualPage];
+			int minC = kernel->pageUsedCount[kernel->machine->frameTable[p].pageTable->virtualPage];
 			for(int i = p + 1; i < NumPhysPages; ++i)
-				if((kernel->machine->lastFrame != i && !(kernel->machine->frameTable[i].inIO)) && minC > kernel->swapTable[kernel->machine->frameTable[i].pageTable->virtualPage])
-					{ p = i; minC = kernel->swapTable[kernel->machine->frameTable[i].pageTable->virtualPage]; }
+				if((kernel->machine->lastFrame != i && !(kernel->machine->frameTable[i].inIO)) && minC > kernel->pageUsedCount[kernel->machine->frameTable[i].pageTable->virtualPage])
+					{ p = i; minC = kernel->pageUsedCount[kernel->machine->frameTable[i].pageTable->virtualPage]; }
 
 			kernel->machine->frameTable[p].pageTable->valid = FALSE;
 		
@@ -206,7 +206,7 @@ ExceptionHandler(ExceptionType which)
 				kernel->machine->frameTable[p].inIO = FALSE;
 				//kernel->machine->frameTable[p].pageTable->dirty = FALSE;
 			}
-            //kernel->swapTable[kernel->machine->frameTable[p]->virtualPage] = 0;
+            //kernel->pageUsedCount[kernel->machine->frameTable[p]->virtualPage] = 0;
 		}
 		else
 		{

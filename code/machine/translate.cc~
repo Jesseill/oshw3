@@ -70,11 +70,11 @@ ShortToMachine(unsigned short shortword) { return ShortToHost(shortword); }
 
 void TranslationEntry::init()
 {
-    ASSERT(!kernel->freeSwapSector->empty())
-    virtualPage  = kernel->freeSwapSector->pop(); // mapping between the virtual and physical page
+    ASSERT(!kernel->freeVirtualPage->empty())
+    virtualPage  = kernel->freeVirtualPage->pop(); // mapping between the virtual and physical page
     //cout<<"init virtualPage :"<<virtualPage<<" withupper: "<<endl;
     
-    kernel->swapTable[virtualPage] = 0;
+    kernel->pageUsedCount[virtualPage] = 0;
    
     valid        = FALSE;
     readOnly     = FALSE;
@@ -254,7 +254,7 @@ Machine::Translate(int virtAddr, int* physAddr, int size, bool writing)
     int swapIndex = entry->virtualPage;
     ASSERT(swapIndex < NumSectors);
 
-	kernel->swapTable[swapIndex] = kernel->counter++;
+	kernel->pageUsedCount[swapIndex] = kernel->counter++;
 
     /// Jess end /////////
 

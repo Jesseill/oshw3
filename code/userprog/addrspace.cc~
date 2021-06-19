@@ -84,7 +84,7 @@ AddrSpace::~AddrSpace()
     {
       if(pageTable[i].valid)
          kernel->machine->freePhysicalPage->push(pageTable[i].physicalPage);
-      kernel->freeSwapSector->push(pageTable[i].virtualPage);
+      kernel->freeVirtualPage->push(pageTable[i].virtualPage);
     }
    //Jess end
    delete pageTable;
@@ -156,12 +156,12 @@ cout<<"virtual mem size "<<size<<endl;
 	for(unsigned i = 0; i < numPages; i++) {
 	    cout<<i<<endl;
 		//pageTable[i].init();
-	     ASSERT(!kernel->freeSwapSector->empty())
-	    pageTable[i].virtualPage  = kernel->freeSwapSector->pop(); 
+	     ASSERT(!kernel->freeVirtualPage->empty())
+	    pageTable[i].virtualPage  = kernel->freeVirtualPage->pop(); 
 		// mapping between the virtual and physical page
 	    //cout<<"init virtualPage :"<<virtualPage<<" withupper: "<<endl;
 	    
-	    kernel->swapTable[pageTable[i].virtualPage] = 0;
+	    kernel->pageUsedCount[pageTable[i].virtualPage] = 0;
 	   
 	    pageTable[i].valid        = FALSE;
 	    pageTable[i].readOnly     = FALSE;

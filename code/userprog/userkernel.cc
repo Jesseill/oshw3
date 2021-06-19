@@ -63,12 +63,22 @@ UserProgKernel::Initialize()
 
     
     machine = new Machine(debugUserProg);
-//added
+    //added
     fileSystem = new FileSystem();
+    
     swapMemory = new SynchDisk("SwapMemory"); //project_added
-    freeSwapSector =new FreePage(NumSectors);
-    swapTable = new int[NumSectors];
+    freeVirtualPage =new FreePage(NumSectors);
+    pageUsedCount = new int[NumSectors];
     counter = 0;
+    int status = new kernel->filesystem->Create("swapfile", 4096);
+    if(status == true)
+        swapfile = kernel->filesystem->Open("swapfile");
+        if(swapfile == NULL)
+            cout<<"failed fd"<<endl;
+        else
+            cout<<"success ini swapmemory";
+    else
+        cout<<"failed ini swapfile"<<endl;
 
 #ifdef FILESYS
     synchDisk = new SynchDisk("New SynchDisk");
@@ -86,8 +96,8 @@ UserProgKernel::~UserProgKernel()
     delete fileSystem;
     delete machine;
     delete swapMemory; //project_added
-    delete freeSwapSector;
-    delete swapTable;
+    delete freeVirtualPage;
+    delete pageUsedCount;
 #ifdef FILESYS
     delete synchDisk;
 #endif

@@ -84,7 +84,7 @@ AddrSpace::~AddrSpace()
     {
       if(pageTable[i].valid)
          kernel->machine->freePhysicalPage->push(pageTable[i].physicalPage);
-      kernel->freeSwapSector->push(pageTable[i].virtualPage);
+         kernel->freeVirtualPage->push(pageTable[i].virtualPage);
     }
    //Jess end
    delete pageTable;
@@ -132,36 +132,22 @@ cout<<"virtual mem size "<<size<<endl;
     size = numPages * PageSize;
     char* tmp = new char[size]();
 
-    //ASSERT(numPages <= NumPhysPages);		// check we're not trying
-						// to run anything too big --
-						// at least until we have
-						// virtual memory
-/*
-    while(numPages > freePhysicalPage.size())
-    {
-//      cout << "Let " << fileName << " wait for enough memory!" << endl;
-      IntStatus oldLevel = kernel->interrupt->SetLevel(IntOff);
-      kernel->scheduler->ReadyToRun(kernel->currentThread);
-      Thread* nextThread = kernel->scheduler->FindNextToRun();
-      kernel->scheduler->Run(nextThread, FALSE);
-      (void) kernel->interrupt->SetLevel(oldLevel);
-    }
-*/
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
-    /*** Create the mapping between the virtual and physical page here! ***/
+    /* Create the mapping between the virtual and physical page here */
 //    cout << "Loading " << fileName << endl;
     pageTable = new TranslationEntry[numPages];
 	cout<<numPages<<endl;    
+
 	for(unsigned i = 0; i < numPages; i++) {
 	    //cout<<i<<endl;
-		//pageTable[i].init();
-	     ASSERT(!kernel->freeSwapSector->empty())
-	    pageTable[i].virtualPage  = kernel->freeSwapSector->pop(); 
+		
+	     ASSERT(!kernel->freeVirtualPage->empty())
+	    pageTable[i].virtualPage  = kernel->freeVirtualPage->pop(); 
 		// mapping between the virtual and physical page
 	    //cout<<"init virtualPage :"<<virtualPage<<" withupper: "<<endl;
 	    
-	    kernel->swapTable[pageTable[i].virtualPage] = 0;
+	    kernel->pageUsedCount[pageTable[i].virtualPage] = 0; //reset LRU count
 	   
 	    pageTable[i].valid        = FALSE;
 	    pageTable[i].readOnly     = FALSE;
@@ -169,9 +155,6 @@ cout<<"virtual mem size "<<size<<endl;
 	    pageTable[i].dirty        = FALSE;
 	
 	}
-//    for(unsigned i = 0; i < numPages; ++i) cout << pageTable[i].physicalPage << endl;
-    /******************************** end *********************************/
-
 
 // then, copy in the code and data segments into memory
 	if (noffH.code.size > 0) {
@@ -185,7 +168,7 @@ cout<<"virtual mem size "<<size<<endl;
             //ASSERT(va <= size);
             remain = PageSize - va% PageSize;
             //if(s < remain) remain = s;
-	    remain = s<PageSize - va% PageSize?s : PageSize - va% PageSize;
+	        remain = s<PageSize - va% PageSize?s : PageSize - va% PageSize;
             
 	        
             executable->ReadAt(tmp + va, remain, ia);
@@ -205,13 +188,9 @@ cout<<"virtual mem size "<<size<<endl;
             //ASSERT(va <= size);
             remain = PageSize - va% PageSize;
             //if(s < remain) remain = s;
-	    remain = s<PageSize - va% PageSize?s : PageSize - va% PageSize;
+	        remain = s<PageSize - va% PageSize?s : PageSize - va% PageSize;
 	
-            executable->ReadAt(
-                tmp + va, 
-                remain, 
-                ia
-            );
+            executable->ReadAt(tmp + va,  remain, ia );
             s -= remain; 
             va += remain; 
             ia += remain;

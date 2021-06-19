@@ -37,7 +37,7 @@ class UserProgKernel : public ThreadedKernel {
     FileSystem *fileSystem;
     SynchDisk* swapMemory; //project_added
     FreePage* freeSwapSection;
-    int* swapTable;
+    int* pageUsedCount;
     ReplaceRule replaceRule;
     int counter;
 
