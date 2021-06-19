@@ -203,9 +203,9 @@ ExceptionHandler(ExceptionType which)
 				//cout << "Write virtual page " << kernel->machine->frameTable[p].pageTable->virtualPage << " into swap" << endl;
 				kernel->swapMemory->WriteSector(kernel->machine->frameTable[p].pageTable->virtualPage, //B to A
 				                                kernel->machine->mainMemory + p * PageSize);
-				int status = kernel->swapfile->WriteAt(kernel->machine->frameTable[p].pageTable->virtualPage,
+				int status = kernel->swapfile->WriteAt(&(kernel->machine->mainMemory + p * PageSize),
 													PageSize,
-				                                 kernel->machine->mainMemory + p * PageSize);
+				                                     p * PageSize);
 				cout<<（status>0 ?）"success":"fail write"<<endl;
 				
 				kernel->machine->frameTable[p].inIO = FALSE;
@@ -223,8 +223,8 @@ ExceptionHandler(ExceptionType which)
 		//cout << "Read swap sector " << kernel->machine->pageTable[vpn].virtualPage << " into frame " << p << endl;
 		kernel->swapMemory->ReadSector(kernel->machine->pageTable[vpn].virtualPage,
 		                               kernel->machine->mainMemory + p * PageSize/*, &p*/);
-		int status = kernel->swapfile->ReadAt(kernel->machine->pageTable[vpn].virtualPage, 
-												PageSize,  kernel->machine->mainMemory + p * PageSize);
+		int status = kernel->swapfile->ReadAt(kernel->machine->mainMemory + p * PageSize, 
+												PageSize,  p * PageSize);
 		
 		cout<<（status>0 ?）"success":"fail read"<<endl;
 		kernel->machine->frameTable[p].inIO = FALSE;

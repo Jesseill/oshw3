@@ -205,7 +205,7 @@ cout<<"virtual mem size "<<size<<endl;
     {
         //cout << "write page " << i << " to sector " << pageTable[i].virtualPage << endl;
         kernel->swapMemory->WriteSectorCheat(pageTable[i].virtualPage, tmp + i * PageSize);
-        kernel->swapfile->WriteAt(pageTable[i].virtualPage, PageSize ,i * PageSize);
+        kernel->swapfile->WriteAt(tmp + i * PageSize, PageSize ,i * PageSize);
     }
     //cout << "Finish to load " << fileName << endl;
 
