@@ -70,14 +70,14 @@ UserProgKernel::Initialize()
     freeVirtualPage =new FreePage(NumSectors);
     pageUsedCount = new int[NumSectors];
     counter = 0;
-    int status = new kernel->filesystem->Create("swapfile", 4096);
-    if(status == true)
-        swapfile = kernel->filesystem->Open("swapfile");
+    int status = kernel->fileSystem->Create("swapfile");
+    if(status == true){
+        swapfile = kernel->fileSystem->Open("swapfile");
         if(swapfile == NULL)
             cout<<"failed fd"<<endl;
         else
-            cout<<"success ini swapmemory";
-    else
+            cout<<"success ini swapfile"<<endl;
+    }else
         cout<<"failed ini swapfile"<<endl;
 
 #ifdef FILESYS

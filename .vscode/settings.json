@@ -1,0 +1,9 @@
+{
+    "files.associations": {
+        "atomic": "c",
+        "istream": "c",
+        "ostream": "c",
+        "streambuf": "c",
+        "iostream": "cpp"
+    }
+}
