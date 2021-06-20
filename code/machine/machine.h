@@ -83,21 +83,17 @@ enum ExceptionType { NoException,           // Everything ok!
 // The procedures in this class are defined in machine.cc, mipssim.cc, and
 // translate.cc.
 //Jess start
-class FreePage //not that powerful, but enough in this homework
+class FreePage 
 {
 public:
-    FreePage(unsigned n)
-    : Array    (new unsigned[n])
-    , begin    (0)
-    , end      (n)
-    , numPages (n)
+    FreePage(unsigned n): Array(new unsigned[n]), begin (0), end (n), numPages (n)
     {
         for(unsigned i = 0; i < numPages; ++i) Array[i] = i;
     }
     ~FreePage() { delete []Array; }
 
-    unsigned pop();
-    void push(unsigned);
+    unsigned pop(){ ASSERT(!empty()); return Array[begin++%numPages]; }
+    void push(unsigned){ ASSERT(!full()); Array[end++%numPages] = p; }
 
     bool empty()const { return begin == end; }
     bool full()const { return size() == numPages; }
@@ -145,10 +141,10 @@ class Machine {
 
     /// Jess start ///////////////
     FreePage* freePhysicalPage; 
+    
     struct FrameTable { 
-        TranslationEntry* pageTable; // virtual page which is stored by the physical page 
-        Thread* t; 
-        bool Lock; // whether this physical page is doing r/w
+        TranslationEntry* pageTable; // virtual page stored by the physical page 
+        bool Lock; // read/write Lock
     }* frameTable;
 
     int lastFrame;

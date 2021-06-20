@@ -4,6 +4,19 @@
         "istream": "c",
         "ostream": "c",
         "streambuf": "c",
-        "iostream": "cpp"
+        "iostream": "cpp",
+        "cmath": "cpp",
+        "exception": "cpp",
+        "memory": "cpp",
+        "system_error": "cpp",
+        "type_traits": "cpp",
+        "utility": "cpp",
+        "xiosbase": "cpp",
+        "xlocale": "cpp",
+        "xlocnum": "cpp",
+        "xmemory": "cpp",
+        "xstring": "cpp",
+        "xutility": "cpp",
+        "xlocinfo": "cpp"
     }
 }

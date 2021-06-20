@@ -83,7 +83,7 @@ AddrSpace::~AddrSpace()
     for(unsigned i = 0; i < numPages; ++i)
     {
       if(pageTable[i].valid)
-         kernel->machine->freePhysicalPage->push(pageTable[i].physicalPage);
+         kernel->freePhysicalPage->push(pageTable[i].physicalPage);
       kernel->freeVirtualPage->push(pageTable[i].virtualPage);
     }
    //Jess end
@@ -134,8 +134,6 @@ AddrSpace::Load(char *fileName)
 
     DEBUG(dbgAddr, "Initializing address space: " << numPages << ", " << size);
 
-    /* Create the mapping between the virtual and physical page here */
-//    cout << "Loading " << fileName << endl;
     pageTable = new TranslationEntry[numPages];
 	//cout<<numPages<<endl;    
 
@@ -192,7 +190,6 @@ AddrSpace::Load(char *fileName)
 	
         }
     }
-
     ASSERT(PageSize == SectorSize);
     //RestoreState();
     //cout << "numPages = " << numPages << endl;
@@ -202,9 +199,9 @@ AddrSpace::Load(char *fileName)
         kernel->VirtualDisk->WriteSecWithoutLock(pageTable[i].virtualPage, tmp + i * PageSize);
         
     }
-    //cout << "Finish loading " << fileName << endl;
-
     delete []tmp;
+
+
     delete executable;			// close file
     return TRUE;			// success
 }

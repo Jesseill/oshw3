@@ -44,7 +44,7 @@ class UserProgKernel : public ThreadedKernel {
 // These are public for notational convenience.
     Machine *machine;
     FileSystem *fileSystem;
-    OpenFile *swapfile;
+
 
 #ifdef FILESYS
     SynchDisk *synchDisk;

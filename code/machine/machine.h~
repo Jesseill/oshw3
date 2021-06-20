@@ -144,7 +144,7 @@ class Machine {
 
 
     /// Jess start ///////////////
-    FreePage* freePhysicalPage; 
+    FreePage* ; 
     struct FrameTable { 
         TranslationEntry* pageTable; // virtual page which is stored by the physical page 
         //Thread* t; 

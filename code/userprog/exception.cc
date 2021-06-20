@@ -186,25 +186,26 @@ ExceptionHandler(ExceptionType which)
 		{
 			//pick a victim
 			p = 0;
-			for(; p < NumPhysPages && (kernel->machine->lastFrame == p || kernel->machine->frameTable[p].Lock); p++);
+
+			int minC = kernel->pageUsedCount[kernel->machine->frameTable[p].pageTable->virtualPage];
+
+			for(int i = p + 1; i < NumPhysPages; i++)
+				if((kernel->machine->lastFrame != i && !(kernel->machine->frameTable[i].Lock)) 
+				&& minC > kernel->pageUsedCount[kernel->machine->frameTable[i].pageTable->virtualPage])
+					{ p = i; minC = kernel->pageUsedCount[kernel->machine->frameTable[i].pageTable->virtualPage]; }
+
 			if(p == NumPhysPages)
-				return;//Abort();
-
-			int minCount = kernel->pageUsedCount[kernel->machine->frameTable[p].pageTable->virtualPage];
-			for(int i = p + 1; i < NumPhysPages; ++i)
-				if((kernel->machine->lastFrame != i && !(kernel->machine->frameTable[i].Lock)) && minCount > kernel->pageUsedCount[kernel->machine->frameTable[i].pageTable->virtualPage])
-					{ p = i; minCount = kernel->pageUsedCount[kernel->machine->frameTable[i].pageTable->virtualPage]; }
-
+				return;//All pages are busy
 
 			kernel->machine->frameTable[p].pageTable->valid = FALSE;
 		
 			if(kernel->machine->frameTable[p].pageTable->dirty)
 			{
 				kernel->machine->frameTable[p].Lock = TRUE;
-				//cout << "Write virtual page " << kernel->machine->frameTable[p].pageTable->virtualPage << " into swap" << endl;
-				kernel->VirtualDisk->WriteSector(kernel->machine->frameTable[p].pageTable->virtualPage, //B to sector[A]
+				//cout << "virtual page " << kernel->machine->frameTable[p].pageTable->virtualPage << " write back" << endl;
+				kernel->VirtualDisk->WriteSector(kernel->machine->frameTable[p].pageTable->virtualPage, //B to A
 				                                kernel->machine->mainMemory + p * PageSize);
-				//cout<<status<<"success or fail write"<<endl;
+				//cout<<"success or fail write"<<endl;
 				
 				kernel->machine->frameTable[p].Lock = FALSE;
 				//kernel->machine->frameTable[p].pageTable->dirty = FALSE;
@@ -214,15 +215,14 @@ ExceptionHandler(ExceptionType which)
 		else
 		{
 			p = kernel->machine->freePhysicalPage->pop();
-			//cout << "Free frame " << p << endl;
+		
 		}
 
 		kernel->machine->frameTable[p].Lock = TRUE;
-		//cout << "Read swap sector " << kernel->machine->pageTable[vpn].virtualPage << " into frame " << p << endl;
+
 		kernel->VirtualDisk->ReadSector(kernel->machine->pageTable[vpn].virtualPage,
-		                               kernel->machine->mainMemory + p * PageSize/*, &p*/);
-		
-		//cout<<status<<"success or fail read"<<endl;
+		                               kernel->machine->mainMemory + p * PageSize/*, &p*/);		
+		//cout<<"success or fail read"<<endl;
 		kernel->machine->frameTable[p].Lock = FALSE;
 
 		kernel->machine->pageTable[vpn].physicalPage = p;
@@ -230,7 +230,6 @@ ExceptionHandler(ExceptionType which)
 		kernel->machine->frameTable[p].pageTable = kernel->machine->pageTable + vpn;
 
 		kernel->machine->frameTable[p].pageTable->valid = TRUE;
-		kernel->machine->frameTable[p].t = kernel->currentThread;
 
 		kernel->machine->lastFrame = p;
 
