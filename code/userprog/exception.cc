@@ -202,7 +202,7 @@ ExceptionHandler(ExceptionType which)
 			{
 				kernel->machine->frameTable[p].Lock = TRUE;
 				//cout << "Write virtual page " << kernel->machine->frameTable[p].pageTable->virtualPage << " into swap" << endl;
-				kernel->swapMemory->WriteSector(kernel->machine->frameTable[p].pageTable->virtualPage, //B to sector[A]
+				kernel->VirtualDisk->WriteSector(kernel->machine->frameTable[p].pageTable->virtualPage, //B to sector[A]
 				                                kernel->machine->mainMemory + p * PageSize);
 				//cout<<status<<"success or fail write"<<endl;
 				
@@ -219,7 +219,7 @@ ExceptionHandler(ExceptionType which)
 
 		kernel->machine->frameTable[p].Lock = TRUE;
 		//cout << "Read swap sector " << kernel->machine->pageTable[vpn].virtualPage << " into frame " << p << endl;
-		kernel->swapMemory->ReadSector(kernel->machine->pageTable[vpn].virtualPage,
+		kernel->VirtualDisk->ReadSector(kernel->machine->pageTable[vpn].virtualPage,
 		                               kernel->machine->mainMemory + p * PageSize/*, &p*/);
 		
 		//cout<<status<<"success or fail read"<<endl;

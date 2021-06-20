@@ -137,7 +137,7 @@ AddrSpace::Load(char *fileName)
     /* Create the mapping between the virtual and physical page here */
 //    cout << "Loading " << fileName << endl;
     pageTable = new TranslationEntry[numPages];
-	cout<<numPages<<endl;    
+	//cout<<numPages<<endl;    
 
 	for(unsigned i = 0; i < numPages; i++) {
 	    //cout<<i<<endl;
@@ -199,7 +199,7 @@ AddrSpace::Load(char *fileName)
     for(int i = 0 ; i < numPages; ++i)
     {
         //cout << "write page " << i << " to sector " << pageTable[i].virtualPage << endl;
-        kernel->swapMemory->WriteSecWithoutLock(pageTable[i].virtualPage, tmp + i * PageSize);
+        kernel->VirtualDisk->WriteSecWithoutLock(pageTable[i].virtualPage, tmp + i * PageSize);
         
     }
     //cout << "Finish loading " << fileName << endl;

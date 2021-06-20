@@ -34,7 +34,7 @@ class UserProgKernel : public ThreadedKernel {
     void SelfTest();		// test whether kernel is working
 
     // Jess start
-    SynchDisk* swapMemory; // virtual disk
+    SynchDisk* VirtualDisk; // virtual disk
     FreePage* freeVirtualPage;
     int* pageUsedCount;
     int counter; //last used counter
