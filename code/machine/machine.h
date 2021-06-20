@@ -148,7 +148,7 @@ class Machine {
     struct FrameTable { 
         TranslationEntry* pageTable; // virtual page which is stored by the physical page 
         Thread* t; 
-        bool inIO; // whether this physical page is doing r/w
+        bool Lock; // whether this physical page is doing r/w
     }* frameTable;
 
     int lastFrame;

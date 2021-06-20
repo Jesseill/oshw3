@@ -153,7 +153,7 @@ Disk::WriteRequest(int sectorNumber, char* data)
 }
 
 void
-Disk::WriteRequestCheat(int sectorNumber, char* data)
+Disk::WriteReqWithoutLock(int sectorNumber, char* data)
 {
     Lseek(fileno, SectorSize * sectorNumber + MagicSize, 0);
     WriteFile(fileno, data, SectorSize);

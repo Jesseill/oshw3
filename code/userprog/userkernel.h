@@ -18,7 +18,7 @@
 #include "synchdisk.h"
 #include "openfile.h"
 
-enum ReplaceRule { FIFO, LRU, LFU, MFU };//Jess SBC
+
 
 class SynchDisk;
 class UserProgKernel : public ThreadedKernel {
@@ -34,10 +34,9 @@ class UserProgKernel : public ThreadedKernel {
     void SelfTest();		// test whether kernel is working
 
     // Jess start
-    SynchDisk* swapMemory; // secondary memory
+    SynchDisk* swapMemory; // virtual disk
     FreePage* freeVirtualPage;
     int* pageUsedCount;
-    ReplaceRule replaceRule;//SBC
     int counter; //last used counter
     // Jess end
 

@@ -38,14 +38,12 @@ class SynchDisk : public CallBackObj {
 					// or written.  These call
     					// Disk::ReadRequest/WriteRequest and
 					// then wait until the request is done.
-    void WriteSector(int sectorNumber, char* data);
-
-    void WriteSectorCheat(int sectorNumber, char* data)//Jess SBC
-     { disk->WriteRequestCheat(sectorNumber, data); }//SBC
-    
+    void WriteSector(int sectorNumber, char* data); 
     void CallBack();			// Called by the disk device interrupt
 					// handler, to signal that the
 					// current disk operation is complete.
+    void WriteSecWithoutLock(int sectorNumber, char* data);//Jess SBC
+     
 
   private:
     Disk *disk;		  		// Raw disk device

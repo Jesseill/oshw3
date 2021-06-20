@@ -82,7 +82,10 @@ SynchDisk::WriteSector(int sectorNumber, char* data)
     semaphore->P();			// wait for interrupt
     lock->Release();
 }
-
+void WriteSecWithoutLock(int sectorNumber, char* data)//Jess 
+{ 
+    disk->WriteReqWithoutLock(sectorNumber, data); 
+}//SBC
 //----------------------------------------------------------------------
 // SynchDisk::CallBack
 // 	Disk interrupt handler.  Wake up any thread waiting for the disk

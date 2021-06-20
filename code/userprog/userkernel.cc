@@ -22,7 +22,7 @@ UserProgKernel::UserProgKernel(int argc, char **argv)
 {
     debugUserProg = FALSE;
 	execfileNum=0;
-    replaceRule = LRU; // using LRU by default
+
     for (int i = 1; i < argc; i++) {
         if (strcmp(argv[i], "-s") == 0) {
 	    debugUserProg = TRUE;
@@ -44,10 +44,7 @@ UserProgKernel::UserProgKernel(int argc, char **argv)
 		cout << "	./nachos -s : Print machine status during the machine is on." << endl;
 		cout << "	./nachos -e file1 -e file2 : executing file1 and file2."  << endl;
 	}
-    else if(strcmp(argv[i], "-fifo") == 0) replaceRule = FIFO;
-    else if(strcmp(argv[i], "-lru" ) == 0) replaceRule = LRU;
-    else if(strcmp(argv[i], "-lfu" ) == 0) replaceRule = LFU;
-    else replaceRule = LRU;
+
     }
 }
 
@@ -66,7 +63,7 @@ UserProgKernel::Initialize()
     //added
     fileSystem = new FileSystem();
     
-    swapMemory = new SynchDisk("SwapMemory"); //project_added
+    swapMemory = new SynchDisk("SwapMemory"); 
     freeVirtualPage =new FreePage(NumSectors);
     pageUsedCount = new int[NumSectors];
     counter = 0;

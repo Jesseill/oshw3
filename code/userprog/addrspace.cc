@@ -51,22 +51,22 @@ SwapHeader (NoffHeader *noffH)
 //	only uniprogramming, and we have a single unsegmented page table
 //----------------------------------------------------------------------
 
-AddrSpace::AddrSpace():pageTable(0)//Jess
+AddrSpace::AddrSpace()//Jess
 {
+    pageTable = NULL
     
-    /*
-    pageTable = new TranslationEntry[NumPhysPages];
-    for (unsigned int i = 0; i < NumPhysPages; i++) {
-	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
-	pageTable[i].physicalPage = i;
-//	pageTable[i].physicalPage = 0;
-	pageTable[i].valid = TRUE;
-//	pageTable[i].valid = FALSE;
-	pageTable[i].use = FALSE;
-	pageTable[i].dirty = FALSE;
-	pageTable[i].readOnly = FALSE;  
-    }
-    */
+//     pageTable = new TranslationEntry[NumPhysPages];
+//     for (unsigned int i = 0; i < NumPhysPages; i++) {
+// 	pageTable[i].virtualPage = i;	// for now, virt page # = phys page #
+// 	pageTable[i].physicalPage = i;
+// //	pageTable[i].physicalPage = 0;
+// 	pageTable[i].valid = TRUE;
+// //	pageTable[i].valid = FALSE;
+// 	pageTable[i].use = FALSE;
+// 	pageTable[i].dirty = FALSE;
+// 	pageTable[i].readOnly = FALSE;  
+//     }
+    
     // zero out the entire address space
 //    bzero(kernel->machine->mainMemory, MemorySize);
 }
@@ -84,7 +84,7 @@ AddrSpace::~AddrSpace()
     {
       if(pageTable[i].valid)
          kernel->machine->freePhysicalPage->push(pageTable[i].physicalPage);
-         kernel->freeVirtualPage->push(pageTable[i].virtualPage);
+      kernel->freeVirtualPage->push(pageTable[i].virtualPage);
     }
    //Jess end
    delete pageTable;
@@ -107,7 +107,7 @@ AddrSpace::Load(char *fileName)
     OpenFile *executable = kernel->fileSystem->Open(fileName);
     NoffHeader noffH;
     unsigned int size;
-    int s,va,ia,remain;
+    int toberead,va,iniaddr,next;
     //cout << "Laoding " << fileName << endl;
 
     if (executable == NULL) {
@@ -127,8 +127,8 @@ AddrSpace::Load(char *fileName)
 						// to leave room for the stack
     numPages = divRoundUp(size, PageSize);
 //	cout << "number of pages of " << fileName<< " is "<<numPages<<endl;
-cout<<"numpages "<<numPages<<endl;
-cout<<"virtual mem size "<<size<<endl;
+//cout<<"numpages "<<numPages<<endl;
+//cout<<"virtual mem size "<<size<<endl;
     size = numPages * PageSize;
     char* tmp = new char[size]();
 
@@ -144,8 +144,6 @@ cout<<"virtual mem size "<<size<<endl;
 		
 	     ASSERT(!kernel->freeVirtualPage->empty())
 	    pageTable[i].virtualPage  = kernel->freeVirtualPage->pop(); 
-		// mapping between the virtual and physical page
-	    //cout<<"init virtualPage :"<<virtualPage<<" withupper: "<<endl;
 	    
 	    kernel->pageUsedCount[pageTable[i].virtualPage] = 0; //reset LRU count
 	   
@@ -161,18 +159,16 @@ cout<<"virtual mem size "<<size<<endl;
         DEBUG(dbgAddr, "Initializing code segment.");
 	    DEBUG(dbgAddr, noffH.code.virtualAddr << ", " << noffH.code.size);
         //cout << "Initializing code segment." << endl;
-        s = noffH.code.size;
+        toberead = noffH.code.size;
         va = noffH.code.virtualAddr;
-        ia = noffH.code.inFileAddr;
-        while(s > 0) {
-            //ASSERT(va <= size);
-            remain = PageSize - va% PageSize;
-            //if(s < remain) remain = s;
-	        remain = s<PageSize - va% PageSize?s : PageSize - va% PageSize;
+        iniaddr = noffH.code.inFileAddr;
+        while(toberead > 0) {
             
-	        
-            executable->ReadAt(tmp + va, remain, ia);
-            s -= remain; va += remain; ia += remain;
+            //next = PageSize - va% PageSize;           
+	        next = toberead<PageSize - va% PageSize?toberead : PageSize - va% PageSize;
+
+            executable->ReadAt(tmp + va, next, iniaddr);
+            toberead -= next; va += next; iniaddr += next;
 	       
         }
     }
@@ -180,20 +176,19 @@ cout<<"virtual mem size "<<size<<endl;
         DEBUG(dbgAddr, "Initializing data segment.");
 	    DEBUG(dbgAddr, noffH.initData.virtualAddr << ", " << noffH.initData.size);
         //cout << "Initializing data segment." << endl;
-        s = noffH.initData.size;
+        toberead = noffH.initData.size;
         va = noffH.initData.virtualAddr;
-        ia = noffH.initData.inFileAddr;
-        while(s > 0)
+        iniaddr = noffH.initData.inFileAddr;
+        while(toberead > 0)
         {
-            //ASSERT(va <= size);
-            remain = PageSize - va% PageSize;
-            //if(s < remain) remain = s;
-	        remain = s<PageSize - va% PageSize?s : PageSize - va% PageSize;
+            
+            //next = PageSize - va% PageSize;         
+	        next = toberead<PageSize - va% PageSize?toberead : PageSize - va% PageSize;
 	
-            executable->ReadAt(tmp + va,  remain, ia );
-            s -= remain; 
-            va += remain; 
-            ia += remain;
+            executable->ReadAt(tmp + va,  next, iniaddr );
+            toberead -= next; 
+            va += next; 
+            iniaddr += next;
 	
         }
     }
@@ -204,10 +199,10 @@ cout<<"virtual mem size "<<size<<endl;
     for(int i = 0 ; i < numPages; ++i)
     {
         //cout << "write page " << i << " to sector " << pageTable[i].virtualPage << endl;
-        kernel->swapMemory->WriteSectorCheat(pageTable[i].virtualPage, tmp + i * PageSize);
+        kernel->swapMemory->WriteSecWithoutLock(pageTable[i].virtualPage, tmp + i * PageSize);
         
     }
-    //cout << "Finish to load " << fileName << endl;
+    //cout << "Finish loading " << fileName << endl;
 
     delete []tmp;
     delete executable;			// close file

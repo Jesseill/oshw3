@@ -66,7 +66,7 @@ class Disk : public CallBackObj {
     					// the disk and return immediately.
     					// Only one request allowed at a time!
     void WriteRequest(int sectorNumber, char* data);
-    void WriteRequestCheat(int sectorNumber, char* data);
+    void WriteReqWithoutLock(int sectorNumber, char* data);
 
     void CallBack();			// Invoked when disk request 
 					// finishes. In turn calls, callWhenDone.
