@@ -83,7 +83,7 @@ AddrSpace::~AddrSpace()
     for(unsigned i = 0; i < numPages; ++i)
     {
       if(pageTable[i].valid)
-         kernel->machine->freePhysicalPage->push(pageTable[i].physicalPage);
+         kernel->freePhysicalPage->push(pageTable[i].physicalPage);
       kernel->freeVirtualPage->push(pageTable[i].virtualPage);
     }
    //Jess end

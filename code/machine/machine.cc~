@@ -218,7 +218,3 @@ Machine::WriteRegister(int num, int value)
     ASSERT((num >= 0) && (num < NumTotalRegs));
     registers[num] = value;
 }
-//Jess add
-unsigned FreePage::pop() { ASSERT(!empty()); cout<< "begin "<<begin<<endl; return Array[begin++%numPages]; }
-void FreePage::push(unsigned p) { ASSERT(!full()); Array[end++%numPages] = p; }
-//Jess end

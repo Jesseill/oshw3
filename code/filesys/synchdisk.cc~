@@ -57,34 +57,12 @@ SynchDisk::~SynchDisk()
 //----------------------------------------------------------------------
 
 void
-SynchDisk::ReadSector(int sectorNumber, char* data, int* p)
+SynchDisk::ReadSector(int sectorNumber, char* data)
 {
-cout << "hoho" << endl;
-//cout << (void*)data << endl;
-cout << p << endl;
-cout << 11 << endl;
-cout << *p << endl;
     lock->Acquire();			// only one disk I/O at a time
-//cout << 1 << endl;
-cout << p << endl;
-cout << 22 << endl;
-cout << *p << endl;
     disk->ReadRequest(sectorNumber, data);
-//cout << 2 << endl;
-cout << p << endl;
-cout << 33 << endl;
-cout << *p << endl;
     semaphore->P();			// wait for interrupt
-//cout << 3 << endl;
-cout << p << endl;
-cout << 44 << endl;
-cout << *p << endl;
     lock->Release();
-//cout << 4 << endl;
-cout << p << endl;
-cout << 55 << endl;
-cout << *p << endl;
-cout << "hoho" << endl;
 }
 
 //----------------------------------------------------------------------
@@ -104,7 +82,10 @@ SynchDisk::WriteSector(int sectorNumber, char* data)
     semaphore->P();			// wait for interrupt
     lock->Release();
 }
-
+void SynchDisk:WriteSecWithoutLock(int sectorNumber, char* data)//Jess 
+{ 
+    disk->WriteReqWithoutLock(sectorNumber, data); 
+}//SBC
 //----------------------------------------------------------------------
 // SynchDisk::CallBack
 // 	Disk interrupt handler.  Wake up any thread waiting for the disk
