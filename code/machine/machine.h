@@ -93,7 +93,7 @@ public:
     ~FreePage() { delete []Array; }
 
     unsigned pop(){ ASSERT(!empty()); return Array[begin++%numPages]; }
-    void push(unsigned){ ASSERT(!full()); Array[end++%numPages] = p; }
+    void push(unsigned p){ ASSERT(!full()); Array[end++%numPages] = p; }
 
     bool empty()const { return begin == end; }
     bool full()const { return size() == numPages; }
@@ -141,7 +141,7 @@ class Machine {
 
     /// Jess start ///////////////
     FreePage* freePhysicalPage; 
-    
+
     struct FrameTable { 
         TranslationEntry* pageTable; // virtual page stored by the physical page 
         bool Lock; // read/write Lock
